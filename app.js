@@ -1,10 +1,8 @@
 const express = require('express');
-const { Socket } = require('socket.io');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-const { v4 : uuidV4} = require('uuid');
-
+const { v4: uuidV4 } = require('uuid');
 const port = 3000;
 
 app.set('view engine', 'ejs');
@@ -20,10 +18,15 @@ app.get('/:room', (req, res) => {
 
 io.on('connection', socket => {
     socket.on('join-room', (roomId, userId) => {
-        console.log(roomId, userId);
-    });
-})
+      socket.join(roomId);
+      socket.broadcast.to(roomId).emit('user-connected', userId); // sends to everyone excpet emitter
 
-app.listen(port, () => {
+      socket.on('disconnect', () => {
+        socket.broadcast.to(roomId).emit('user disconnected', userId);
+      })
+    });
+});
+
+server.listen(port, () => {
     console.log('app running on port 3000');
 });
