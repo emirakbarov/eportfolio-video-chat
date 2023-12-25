@@ -14,6 +14,9 @@ const users = {};
 app.get('/', (req, res) => {
     res.render('index.ejs');
 });
+app.get('/room', (req, res) => {
+    res.render('room.ejs');
+})
 
 io.on('connection', socket => {
     console.log('user connected');

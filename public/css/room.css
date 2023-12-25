@@ -1,0 +1,74 @@
+
+#room-container {
+    width: 100%;
+    display: flex;
+    margin-top: 2rem;
+    height: 100%;
+}
+
+#chat-container,
+#video-container {
+    width: 50%; /* Initial width, adjust as needed */
+    background-color: var(--app-green);
+    border-radius: 10px;
+    border: solid 5px var(--darkest-green);
+    overflow: hidden; /* Ensure content doesn't overflow */
+}
+
+#resizable-handle {
+    cursor: ew-resize; /* Set cursor to indicate resizable */
+    width: 10px; /* Adjust handle width as needed */
+    background-color: #ccc; /* Handle color */
+    margin: 0 5px; /* Adjust margin for handle placement */
+}
+
+#resizable-handle:hover {
+    background-color: #ddd; /* Hover color */
+}
+
+#chat-container {
+    resize: horizontal; /* Enable horizontal resizing */
+    overflow: auto; /* Allow content to be scrolled if resized */
+}
+
+#message-container {
+    height: 300px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+#send-message {
+    background-color: lightgreen;
+    border-radius: 5px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+}
+#message, #send-message-btn {
+    background-color: lightyellow;
+    border: solid 1px black;
+    border-radius: 3px;
+    height: 20px;
+    margin-bottom: 2px;
+    
+}
+#send-message-btn {
+    font-weight: bold;
+    height: 25px;
+    background-color: lightcoral;
+}
+.div {
+    background-color: lightgrey;
+    min-height: 20px;
+    width: min-content;
+    min-width: 585px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    border: solid 1px black;
+    padding-left: 5px;
+    box-sizing: border-box;
+    margin: 5px 0;
+}

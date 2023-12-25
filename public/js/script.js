@@ -43,6 +43,7 @@ messageForm.addEventListener('submit', e => {
 
 function appendMessage(message) {
     const appendedMessage = document.createElement('div');
+    appendedMessage.classList.add("div");
     appendedMessage.innerText = message;
     messageContainer.append(appendedMessage);
 }
@@ -60,3 +61,38 @@ function checkForUsers(users, deletedUser) {
         return `Other users in the chat: ${otherUsers.toString()}`;
     }
 }
+document.addEventListener("DOMContentLoaded", function () {
+    const handle = document.getElementById("resizable-handle");
+    const chatContainer = document.getElementById("chat-container");
+    const videoContainer = document.getElementById("video-container");
+
+    const chatWidth = chatContainer.offsetWidth;
+    const videoWidth = videoContainer.offsetWidth;
+    console.log(chatWidth, videoWidth);
+
+    let isDragging = false;
+
+    handle.addEventListener("mousedown", function (event) {
+        isDragging = true;
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+    });
+
+    function handleMouseMove(event) {
+        if (isDragging) {
+            const newWidth = event.clientX / window.innerWidth * videoWidth;
+            console.log(newWidth)
+            console.log(newWidth / chatWidth > 0.5, newWidth / videoWidth > 0.5);
+            if (newWidth / chatWidth > 0.5 || newWidth / videoWidth > 0.5) {
+                videoContainer.style.width = `${newWidth}%`;
+                chatContainer.style.width = `${100 - newWidth}%`;
+            }
+        }
+    }
+
+    function handleMouseUp() {
+        isDragging = false;
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+    }
+});
