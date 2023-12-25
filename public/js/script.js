@@ -1,23 +1,24 @@
+
 const socket = io();
 
 const messageContainer = document.getElementById('message-container');
 const messageForm = document.getElementById('send-message');
 const sendMessage = document.getElementById('send-message-btn');
-const name = prompt('What is your name?');
+let name;
+console.log(name);
+do {
+    name = prompt('What is your name?');
+} while (name == null);
 
 appendMessage(`You (${name}) joined`);
 socket.emit('new-user', name);
 socket.on('get-users', users => {
-    if (Object.keys(users).length < 2) {
-        appendMessage('No users in the chat apart from you!');
-    } else {
-        const userListString = Object.values(users).join(', ');
-        appendMessage(`Users in the chat: ${userListString}`);
-    }
+    appendMessage(checkForUsers(users));
 });
 
-socket.on('user-disconnected', user => {
-    appendMessage(`${name} disconnected!`);
+socket.on('user-disconnected', (user, users) => {
+    appendMessage(`${user} disconnected!`);
+    appendMessage(checkForUsers(users, user));
 });
 
 socket.on('broadcast-user-join', name => {
@@ -44,4 +45,18 @@ function appendMessage(message) {
     const appendedMessage = document.createElement('div');
     appendedMessage.innerText = message;
     messageContainer.append(appendedMessage);
+}
+
+function checkForUsers(users, deletedUser) {
+    if (Object.keys(users).length < 2) {
+        return 'No users in the chat apart from you!';
+    } else {
+        let otherUsers = [];
+        for (let username in users) {
+            if (users[username] != name) {
+                otherUsers.push(users[username]);
+            }
+        }
+        return `Other users in the chat: ${otherUsers.toString()}`;
+    }
 }
