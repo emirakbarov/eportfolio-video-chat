@@ -13,6 +13,7 @@ const { ExpressPeerServer } = require('peer');
 const peerServer = ExpressPeerServer(server, {
   debug: true,
 });
+peerServer.on('error', error => console.log(error));
 const port = 3000;
 
 app.set('view-engine', 'ejs');
