@@ -80,10 +80,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function handleMouseMove(event) {
         if (isDragging) {
-            const newWidth = event.clientX / window.innerWidth * videoWidth;
-            console.log(newWidth)
-            console.log(newWidth / chatWidth > 0.5, newWidth / videoWidth > 0.5);
-            if (newWidth / chatWidth > 0.5 || newWidth / videoWidth > 0.5) {
+            const newWidth = event.clientX / window.innerWidth * 100; // new width as percentage
+            if (newWidth > 25 && newWidth < 75) { // check if it is less than 25% of screen; 50% of original
                 videoContainer.style.width = `${newWidth}%`;
                 chatContainer.style.width = `${100 - newWidth}%`;
             }

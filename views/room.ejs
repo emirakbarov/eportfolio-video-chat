@@ -2,18 +2,27 @@
 <html lang="en">
 <%- include('./partials/head', {title : "Room"}) %>
 <body>
+  <nav id="navbar">
+    <ul id="nav-list">
+      <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
+      <li class="nav-item"><a href="/room" class="nav-link">New</a></li>
+      <li id="logo" class="nav-item"><a href="/" class="nav-link">Chat Room</a></li>
+      <li class="nav-item"><a href="/" class="nav-link">Private</a></li>
+      <li class="nav-item"><a href="#" class="nav-link">Settings</a></li>
+    </ul>
+  </nav>
   <main class="max-width">
     <div id="room-container" class="flex max-width">
         <div id="video-container">
 
         </div>
-        <div id="resizable-handle"></div>
+        <div id="resizable-handle"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2023 Fonticons, Inc.--><path d="M64 64c0-17.7-14.3-32-32-32S0 46.3 0 64V448c0 17.7 14.3 32 32 32s32-14.3 32-32V64zm128 0c0-17.7-14.3-32-32-32s-32 14.3-32 32V448c0 17.7 14.3 32 32 32s32-14.3 32-32V64z"/></svg></div>
         <div id="chat-container">
             <div id="message-container">
 
             </div>
             <form id="send-message">
-              <input type="text" id="message">
+              <input type="text" id="message" placeholder="Type your message...">
               <button type="submit" id="send-message-btn">Send</button>
             </form>
         </div>
