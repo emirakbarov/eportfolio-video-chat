@@ -5,28 +5,33 @@ const messageContainer = document.getElementById('message-container');
 const messageForm = document.getElementById('send-message');
 const sendMessage = document.getElementById('send-message-btn');
 let name;
+
+const right = 'right-message';
+const left = 'left-message';
+const center = 'center-message';
+
 console.log(name);
 do {
     name = prompt('What is your name?');
 } while (name == null);
 
-appendMessage(`You (${name}) joined`);
+appendMessage(`You (${name}) joined`, center);
 socket.emit('new-user', name);
 socket.on('get-users', users => {
-    appendMessage(checkForUsers(users));
+    appendMessage(checkForUsers(users), center);
 });
 
 socket.on('user-disconnected', (user, users) => {
-    appendMessage(`${user} disconnected!`);
-    appendMessage(checkForUsers(users, user));
+    appendMessage(`${user} disconnected!`, center);
+    appendMessage(checkForUsers(users, user), center);
 });
 
 socket.on('broadcast-user-join', name => {
-    appendMessage(`${name} joined`);
+    appendMessage(`${name} joined`, center);
 });
 
 socket.on('broadcast-message', (message, name) => {
-    appendMessage(`${name}: ${message}`);
+    appendMessage(`${name}: ${message}`, left);
 });
 
 messageForm.addEventListener('submit', e => {
@@ -34,21 +39,22 @@ messageForm.addEventListener('submit', e => {
     const message = document.getElementById('message');
     if (message.value != '') {
         socket.emit('send-message', message.value);
-        appendMessage(`You: ${message.value}`);
+        appendMessage(`You: ${message.value}`, right);
         message.value = '';
     } else {
         alert('Please enter a message!');
     }
 });
 
-function appendMessage(message) {
+function appendMessage(message, pos) {
     const appendedMessage = document.createElement('div');
     appendedMessage.classList.add("div");
+    appendedMessage.classList.add(pos);
     appendedMessage.innerText = message;
     messageContainer.append(appendedMessage);
+    messageContainer.scrollTop = messageContainer.scrollHeight
 }
-
-function checkForUsers(users, deletedUser) {
+function checkForUsers(users) {
     if (Object.keys(users).length < 2) {
         return 'No users in the chat apart from you!';
     } else {
@@ -61,7 +67,8 @@ function checkForUsers(users, deletedUser) {
         return `Other users in the chat: ${otherUsers.toString()}`;
     }
 }
-document.addEventListener("DOMContentLoaded", function () {
+// resize draggable
+document.addEventListener("DOMContentLoaded",  () => {
     const handle = document.getElementById("resizable-handle");
     const chatContainer = document.getElementById("chat-container");
     const videoContainer = document.getElementById("video-container");
