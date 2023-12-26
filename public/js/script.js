@@ -1,21 +1,56 @@
 
 const socket = io();
+var peer = new Peer();
 
 const messageContainer = document.getElementById('message-container');
 const messageForm = document.getElementById('send-message');
 const sendMessage = document.getElementById('send-message-btn');
 let name;
-const videoContainer = document.getElementById('video-container');
-const video = document.getElementById();
-
 const right = 'right-message';
 const left = 'left-message';
 const center = 'center-message';
+const videoContainer = document.getElementById('video-container');
+const userVideoContainer = document.getElementById('video1');
+const partnerVideoContainer = document.getElementById('video2');
 
-console.log(name);
 do {
     name = prompt('What is your name?');
 } while (name == null);
+
+const userVideo = document.createElement('video');
+userVideo.classList.add('videos');
+userVideoContainer.append(userVideo);
+userVideo.muted = true;
+const peers = {};
+navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: true
+}).then(stream => {
+    addVideoStream(userVideo, stream);
+    
+    peer.on('call', call => {
+        console.log('called');
+        call.answer(stream);
+        const partnerVideo = document.createElement('video');
+        partnerVideo.classList.add('videos');
+        partnerVideoContainer.append(partnerVideo);
+        call.on('stream', userVideoStream => {
+            addVideoStream(partnerVideo, userVideoStream);
+        });
+    });
+    socket.on('user-video-connection', userId => {
+        connectToNewUser(userId, stream);
+    });
+});
+
+const connectToNewUser = (userId, stream) => {
+    console.log('I call someone' + userId);
+    const call = peer.call(userId, stream);
+    const video = document.createElement("video");
+    call.on("stream", (userVideoStream) => {
+      addVideoStream(video, userVideoStream);
+    });
+};
 
 appendMessage(`You (${name}) joined`, center);
 socket.emit('new-user', name);
@@ -103,3 +138,9 @@ document.addEventListener("DOMContentLoaded",  () => {
         document.removeEventListener("mouseup", handleMouseUp);
     }
 });
+function addVideoStream(video, stream) {
+    video.srcObject = stream
+    video.addEventListener('loadedmetadata', () => {
+      video.play()
+    })
+}

@@ -104,3 +104,22 @@
 .center-message {
     margin: 5px auto;
 }
+
+#video-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+#video1, #video2 {
+    background-color: red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48%;
+    width: 100%;
+}
+.videos {
+    height: 100%;
+    width: 100%;
+}

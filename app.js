@@ -3,7 +3,12 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: '*'
+    },
+    allowEIO3: true
+});
 const { ExpressPeerServer } = require('peer');
 const peerServer = ExpressPeerServer(server, {
   debug: true,
@@ -29,6 +34,7 @@ io.on('connection', socket => {
         users[socket.id] = name;
         socket.broadcast.emit('broadcast-user-join', name);
         socket.emit('get-users', users);
+        socket.broadcast.emit('user-video-connection', 10);
     });
     socket.on('send-message', message => {
         socket.broadcast.emit('broadcast-message', message, users[socket.id]);
