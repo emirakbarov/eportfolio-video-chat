@@ -4,10 +4,15 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
 const io = new Server(server);
+const { ExpressPeerServer } = require('peer');
+const peerServer = ExpressPeerServer(server, {
+  debug: true,
+});
 const port = 3000;
 
 app.set('view-engine', 'ejs');
 app.use(express.static('public'));
+app.use('/peerjs', peerServer);
 
 const users = {};
 

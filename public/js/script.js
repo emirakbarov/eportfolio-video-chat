@@ -5,6 +5,8 @@ const messageContainer = document.getElementById('message-container');
 const messageForm = document.getElementById('send-message');
 const sendMessage = document.getElementById('send-message-btn');
 let name;
+const videoContainer = document.getElementById('video-container');
+const video = document.getElementById();
 
 const right = 'right-message';
 const left = 'left-message';
