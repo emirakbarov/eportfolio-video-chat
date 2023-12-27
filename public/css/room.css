@@ -150,6 +150,7 @@
     height: 100%;
     width: 100%;
     display: flex;
+    list-style: none;
 }
 .video-item, .video-item svg {
     height: 100%;
@@ -163,7 +164,7 @@
     border: none;
 }
 .video-item svg {
-    padding: 1.4rem;
+    padding: 0.7rem;
     box-sizing: border-box;
     cursor: pointer;
 }
