@@ -24,6 +24,7 @@ userVideo.muted = true;
 peer.on('open', id => {
     console.log('unique-id is ', id);
     socket.emit('request-connection', id);
+    console.log(id);
 });
 
 //add audio to video
@@ -52,12 +53,16 @@ navigator.mediaDevices.getUserMedia({
 function connectToNewUser(userId, stream) {
     const call = peer.call(userId, stream); // call the user with the given Id
     const video = document.createElement("video");
+    video.classList.add('videos');
+    partnerVideoContainer.append(video);
     call.on('stream', (userVideoStream) => {
       addVideoStream(video, userVideoStream);
     });
     call.on('close', () => {
         video.remove();
     });
+    peers[userId] = call;
+    console.log(call);
 };
 
 appendMessage(`You (${name}) joined`, center);
@@ -106,9 +111,9 @@ function checkForUsers(users) {
 }
 
 function addVideoStream(video, stream) {
-    video.srcObject = stream
+    video.srcObject = stream;
     video.addEventListener('loadedmetadata', () => {
-      video.play()
+      video.play();
     })
 }
 function appendMessage(message, pos) {
