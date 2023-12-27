@@ -8,11 +8,16 @@
 
 #chat-container,
 #video-container {
-    width: 50%; /* Initial width, adjust as needed */
     background-color: var(--app-green);
     border-radius: 10px;
     border: solid 5px var(--darkest-green);
     overflow: hidden; /* Ensure content doesn't overflow */
+}
+#video-container {
+    width: 26%;
+}
+#chat-container {
+    width: 74%;
 }
 
 #resizable-handle {
@@ -52,6 +57,7 @@
     align-items: center;
     box-sizing: border-box;
     z-index: 2;
+    width: 75%;
 }
 
 #message {
@@ -112,15 +118,52 @@
     justify-content: space-between;
 }
 #video1, #video2 {
-    background-color: red;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 48%;
     width: 100%;
+    border-top: solid 5px var(--darkest-green);
+}
+#video1 {
+    border-top: none;
+    border-bottom: solid 5px var(--darkest-green);
 }
 .videos {
     height: 100%;
     width: 100%;
     transform: rotateY(180deg);
+}
+
+#bottom-chat {
+    width: 100%;
+    display: flex;
+}
+
+#video-nav {
+    width: 25%;
+    height: 100%;
+    display: flex;
+}
+#video-list {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+.video-item, .video-item svg {
+    height: 100%;
+}
+.video-button {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+}
+.video-item svg {
+    padding: 1.4rem;
+    box-sizing: border-box;
+    cursor: pointer;
 }

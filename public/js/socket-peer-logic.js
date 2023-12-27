@@ -22,7 +22,6 @@ userVideo.muted = true;
 
 //handle the openning
 peer.on('open', id => {
-    console.log('unique-id is ', id);
     socket.emit('request-connection', id);
     console.log(id);
 });
