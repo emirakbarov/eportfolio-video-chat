@@ -27,3 +27,21 @@ main {
     height: 80vh;
     margin-top: 8rem;
 }
+
+#title {
+    text-align: center;
+    vertical-align: middle;
+    font-size: 4rem;
+    color: var(--darkest-green);
+    font-family: var(--font-txt);
+    margin: auto 0;
+}
+
+#desc {
+    margin-top: 2rem;
+}
+.normal-text {
+    text-align: center;
+    width: 60%;
+    margin: 0 auto;
+}

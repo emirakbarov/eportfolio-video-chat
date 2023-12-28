@@ -2,6 +2,7 @@
 const socket = io();
 var peer = new Peer();
 const peers = {};
+const availableRooms = {};
 
 // define static vars 
 let name;
@@ -82,7 +83,6 @@ navigator.mediaDevices.getUserMedia({
             peers[userId].close();
             appendMessage(`${user} disconnected!`, center);
             appendMessage(checkForUsers(users, user), center);
-        } else {
             alert('error');
         }
     });
