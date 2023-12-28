@@ -8,11 +8,20 @@ let name;
 const videoContainer = document.getElementById('video-container');
 const userVideoContainer = document.getElementById('video1');
 const partnerVideoContainer = document.getElementById('video2');
+let isMuted = false;
+let videoStoped = false;
 
 //get name
 do {
     name = prompt('What is your name?');
 } while (name == null);
+
+//check if room full
+
+socket.on('room-full', () => {
+    alert('Room is full, try another room');
+    window.location.href = window.location.origin + '/room';
+});
 
 //create user video
 const userVideo = document.createElement('video');
@@ -21,10 +30,6 @@ userVideoContainer.append(userVideo);
 userVideo.muted = true;
 
 //handle the openning
-peer.on('open', id => {
-    socket.emit('request-connection', id);
-    console.log(id);
-});
 
 //add audio to video
 navigator.mediaDevices.getUserMedia({
@@ -47,6 +52,40 @@ navigator.mediaDevices.getUserMedia({
             addVideoStream(partnerVideo, partnerVideoStream);
         });
     });
+    appendMessage(`You (${name}) joined`, center);
+    socket.emit('new-user', name);
+    socket.on('get-users', users => {
+        appendMessage(checkForUsers(users), center);
+    });
+
+    socket.on('broadcast-user-join', name => {
+        appendMessage(`${name} joined`, center);
+    });
+
+    socket.on('broadcast-message', (message, name) => {
+        appendMessage(`${name}: ${message}`, left);
+    });
+
+    messageForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const message = document.getElementById('message');
+        if (message.value != '') {
+            socket.emit('send-message', message.value);
+            appendMessage(`You: ${message.value}`, right);
+            message.value = '';
+        } else {
+            alert('Please enter a message!');
+        }
+    });
+    socket.on('user-disconnected', (user, users, userId) => {
+        if(peers[userId]) {
+            peers[userId].close();
+            appendMessage(`${user} disconnected!`, center);
+            appendMessage(checkForUsers(users, user), center);
+        } else {
+            alert('error');
+        }
+    });
 });
 
 function connectToNewUser(userId, stream) {
@@ -63,37 +102,6 @@ function connectToNewUser(userId, stream) {
     peers[userId] = call;
     console.log(call);
 };
-
-appendMessage(`You (${name}) joined`, center);
-socket.emit('new-user', name);
-socket.on('get-users', users => {
-    appendMessage(checkForUsers(users), center);
-});
-
-socket.on('user-disconnected', (user, users) => {
-    appendMessage(`${user} disconnected!`, center);
-    appendMessage(checkForUsers(users, user), center);
-});
-
-socket.on('broadcast-user-join', name => {
-    appendMessage(`${name} joined`, center);
-});
-
-socket.on('broadcast-message', (message, name) => {
-    appendMessage(`${name}: ${message}`, left);
-});
-
-messageForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const message = document.getElementById('message');
-    if (message.value != '') {
-        socket.emit('send-message', message.value);
-        appendMessage(`You: ${message.value}`, right);
-        message.value = '';
-    } else {
-        alert('Please enter a message!');
-    }
-});
 
 function checkForUsers(users) {
     if (Object.keys(users).length < 2) {
@@ -123,3 +131,42 @@ function appendMessage(message, pos) {
     messageContainer.append(appendedMessage);
     messageContainer.scrollTop = messageContainer.scrollHeight
 }
+
+const muteSelf = document.getElementById('mute-self');
+const stopVideo = document.getElementById('stop-video-self');
+
+peer.on('open', id => {
+    if(ROOM_ID != '/') {
+        socket.emit('request-connection', ROOM_ID, id);
+        console.log(id);
+    } else {
+        console.log('roomid slash');
+    }
+});
+
+muteSelf.addEventListener('click', () => {
+    if (userVideo) {
+        isMuted = !isMuted;
+
+        userVideo.srcObject.getAudioTracks().forEach(track => {
+            track.enabled = !isMuted;
+        });
+
+        if (isMuted) {
+            console.log('You are muted');
+        } else {
+            console.log('You are unmuted');
+        }
+    } else {
+        alert('No video/microphone detected. Mute failed');
+    }
+});
+stopVideo.addEventListener('click', () => {
+    if(userVideo) {
+        videoStoped = !videoStoped;
+
+        userVideo.srcObject.getVideoTracks().forEach(track => {
+            track.enabled = !videoStoped;
+        });
+    }
+});

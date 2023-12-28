@@ -50,20 +50,20 @@
     box-sizing: border-box;
 }
 #send-message {
-    border-radius: 5px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
     z-index: 2;
-    width: 75%;
+    border-top: solid 3px var(--darkest-green);
+    width: 100%;
 }
 
 #message {
     width: 95%;
     border-radius: 10px;
-    margin-bottom: 1rem;
+    margin: 0.5rem 0;
     height: 2rem;
     border: solid 2px black;
     padding-left: 6px;
@@ -78,7 +78,7 @@
     width: 95%;
     font-size: 1.1rem;
     border: solid 2px black;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     cursor: pointer;
 }
 #send-message-btn:hover, #message:hover {
@@ -135,36 +135,34 @@
     transform: rotateY(180deg);
 }
 
-#bottom-chat {
+#bottom-container {
     width: 100%;
     display: flex;
+    align-items: center;
 }
 
-#video-nav {
-    width: 25%;
-    height: 100%;
-    display: flex;
-}
-#video-list {
-    display: flex;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    list-style: none;
-}
-.video-item, .video-item svg {
-    height: 100%;
-}
 .video-button {
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: transparent;
-    border: none;
+    border: solid 3px var(--darkest-green);
+    border-left: none;
+    border-bottom: none;
+    height: 100%;
 }
-.video-item svg {
+.video-button a {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.video-button svg {
     padding: 0.7rem;
     box-sizing: border-box;
     cursor: pointer;
+    height: 75%;
+    fill: var(--darkest-green);
+    vertical-align: middle;
 }
