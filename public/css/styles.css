@@ -1,5 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@300&family=Roboto+Mono&display=swap');
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px); 
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0); 
+    }
+}
+
 :root {
     --blue: #acd2ed;
     --yellow: #e1e289;
@@ -22,26 +33,90 @@ body {
 
 .max-width {
     width: 100vw;
+    height: 80vh;
+}
+body {
+    overflow-x: hidden;
 }
 main {
-    height: 80vh;
+    height: 80%;
     margin-top: 8rem;
 }
 
 #title {
-    text-align: center;
     vertical-align: middle;
+    text-align: center;
+    margin: 0 auto;
     font-size: 4rem;
     color: var(--darkest-green);
     font-family: var(--font-txt);
-    margin: auto 0;
+    padding-top: 16rem;
+    box-sizing: border-box;
+    opacity: 0;
 }
 
 #desc {
     margin-top: 2rem;
+    opacity: 0;
 }
 .normal-text {
     text-align: center;
     width: 60%;
     margin: 0 auto;
+    vertical-align: middle;
+}
+.headers {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+#users-online {
+    color: var(--blue);
+    font-size: 1.7rem;
+}
+#manual-join-meeting {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3rem;
+}
+#meeting-code {
+    background-color: var(--app-green);
+    border: solid 2px var(--darkest-green);
+    width: 15rem;
+    height: 2rem;
+    border-radius: 7px;
+    padding: 0 4px;
+    box-sizing: border-box;
+    margin-right: 1rem;
+    color: var(--darkest-green);
+}
+#meeting-code:hover, #submit-code:hover {
+    border: solid 3px var(--darkest-green);
+}
+#meeting-code::placeholder {
+    color: var(--darkest-green);
+}
+#submit-code {
+    background-color: var(--app-green);
+    border: solid 2px var(--darkest-green);
+    border-radius: 7px;
+    width: 4rem;
+    height: 2rem;
+}
+#footer {
+    height: 40vh;
+    background-color: #093a10;
+    border-top: solid 4px var(--darkest-green);
+}
+
+.hidden {
+    opacity: 0;
+}
+.show {
+    opacity: 1;
+    animation: fadeIn ease 1s forwards;
+}
+
+#title-container, #strangers-container, #manual-container {
+    height: 100vh;
 }

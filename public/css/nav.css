@@ -8,6 +8,7 @@
     width: 100vw;
     display: flex;
     align-items: center;
+    z-index: 10;
 }
 
 #nav-list {

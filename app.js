@@ -7,14 +7,16 @@ const io = new Server(server, {
     allowEIO3: true
 });
 const { v4: uuidV4 } = require('uuid');
+const bp = require('body-parser');
 const port = 3000;
 const roomSockets = {};
 
 app.set('view-engine', 'ejs');
 app.use(express.static('public'));
+app.use(bp.urlencoded({ extended: false }));
+app.use(bp.json());
 
 const users = {};
-
 
 app.get('/', (req, res) => {
     res.render('index.ejs');
@@ -24,9 +26,17 @@ app.get('/new-room', (req, res) => {
 });
 app.get('/room', (req, res) => {
     res.render('room.ejs', {roomId: "/"});
-})
+});
+
+app.get('/manual-create', (req, res) => {
+    res.redirect(`/${code()}`);
+});
+
 app.get('/:room', (req, res) => {
     res.render('room.ejs', {roomId: req.params.room});
+});
+app.get('/:code', (req, res) => {
+    res.render('room.ejs', {code: req.params.code});
 });
 
 io.on('connection', socket => {
@@ -65,3 +75,7 @@ io.on('connection', socket => {
 server.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
+
+function code() {
+    return Math.floor(100000 + Math.random() * 900000);
+}

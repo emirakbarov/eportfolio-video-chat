@@ -79,12 +79,10 @@ navigator.mediaDevices.getUserMedia({
         }
     });
     socket.on('user-disconnected', (user, users, userId) => {
-        if(peers[userId]) {
-            peers[userId].close();
-            appendMessage(`${user} disconnected!`, center);
-            appendMessage(checkForUsers(users, user), center);
-            alert('error');
-        }
+        peers[userId].close();
+        appendMessage(`${user} disconnected!`, center);
+        appendMessage(checkForUsers(users, user), center);
+        window.location.href = window.location.origin + '/room';
     });
 });
 
