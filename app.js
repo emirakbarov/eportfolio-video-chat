@@ -10,33 +10,64 @@ const { v4: uuidV4 } = require('uuid');
 const bp = require('body-parser');
 const port = 3000;
 const roomSockets = {};
+const users = {};
+const rooms = {};
+const codes = [];
 
-app.set('view-engine', 'ejs');
+app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bp.urlencoded({ extended: false }));
 app.use(bp.json());
 
-const users = {};
+connectDB();
+
+const roomSchema = new mongoose.Schema({
+    code: String,
+    roomId: String,
+});
+const joinableRoom = mongoose.model('joinableRoom', roomSchema);
 
 app.get('/', (req, res) => {
     res.render('index.ejs');
 });
 app.get('/new-room', (req, res) => {
-    res.redirect(`/${uuidV4()}`);
-});
-app.get('/room', (req, res) => {
-    res.render('room.ejs', {roomId: "/"});
+    const joinCode = "null";
+    res.redirect(`/${uuidV4()}?joinCode=${joinCode}`);
 });
 
 app.get('/manual-create', (req, res) => {
-    res.redirect(`/${code()}`);
+    const joinCode = code();
+    res.redirect(`/${uuidV4()}?joinCode=${joinCode}`);
+});
+
+app.post('/manual-join', (req, res) => {
+    const enteredCode = req.body.code;
+    console.log(enteredCode, rooms[enteredCode]);
+    if (rooms[enteredCode]) {
+        res.redirect(`/${uuidV4()}?enteredCode=${enteredCode}`);
+    } else {
+        // Handle the case where the entered code is not valid
+        res.render('index.ejs', { errorMessage: 'Invalid code' });
+    }
 });
 
 app.get('/:room', (req, res) => {
-    res.render('room.ejs', {roomId: req.params.room});
-});
-app.get('/:code', (req, res) => {
-    res.render('room.ejs', {code: req.params.code});
+    const joinCode = req.query.joinCode;
+    const enteredCode = req.query.enteredCode;
+
+    if (joinCode) {
+        rooms[joinCode] = req.params.room;
+        res.render('room.ejs', { roomId: req.params.room });
+    } else if (enteredCode) {
+        if (rooms[enteredCode]) {
+            res.render(`/${rooms[enteredCode]}`);
+        } else {
+            const referer = req.headers.referer || '/';
+            res.redirect(`${referer}`, { err: '404' });
+        }
+    } else {
+        res.render('room.ejs', { roomId: req.params.room });
+    }
 });
 
 io.on('connection', socket => {
@@ -77,5 +108,10 @@ server.listen(port, () => {
 });
 
 function code() {
-    return Math.floor(100000 + Math.random() * 900000);
+    let code;
+    do {
+        code = Math.floor(100000 + Math.random() * 900000);
+    } while (codes[code])
+    codes.push(code);
+    return code;
 }

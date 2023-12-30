@@ -2,7 +2,6 @@
 const socket = io();
 var peer = new Peer();
 const peers = {};
-const availableRooms = {};
 
 // define static vars 
 let name;
@@ -29,8 +28,6 @@ const userVideo = document.createElement('video');
 userVideo.classList.add('videos');
 userVideoContainer.append(userVideo);
 userVideo.muted = true;
-
-//handle the openning
 
 //add audio to video
 navigator.mediaDevices.getUserMedia({

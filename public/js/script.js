@@ -12,10 +12,12 @@ document.addEventListener("DOMContentLoaded",  () => {
     const title = document.getElementById('title');
     const desc = document.getElementById('desc');
     
-    title.style.animation = "fadeIn ease 1s forwards";
-    setTimeout(() => {
-        desc.style.animation = "fadeIn ease 1s forwards"
-    }, 200);
+    if (title && desc) {
+        title.style.animation = "fadeIn ease 1s forwards";
+        setTimeout(() => {
+            desc.style.animation = "fadeIn ease 1s forwards"
+        }, 200);
+    }
     
     //load scroll anims:
     const ib = new IntersectionObserver(entries => {
@@ -42,25 +44,28 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     let isDragging = false;
 
-    handle.addEventListener("mousedown", function (event) {
-        isDragging = true;
-        document.addEventListener("mousemove", handleMouseMove);
-        document.addEventListener("mouseup", handleMouseUp);
-    });
+    if (handle && chatContainer && videoContainer) {
 
-    function handleMouseMove(event) {
-        if (isDragging) {
-            const newWidth = event.clientX / window.innerWidth * 100; // new width as percentage
-            if (newWidth > 25 && newWidth < 75) { // check if it is less than 25% of screen; 50% of original
-                videoContainer.style.width = `${newWidth}%`;
-                chatContainer.style.width = `${100 - newWidth}%`;
+        handle.addEventListener("mousedown", function (event) {
+            isDragging = true;
+            document.addEventListener("mousemove", handleMouseMove);
+            document.addEventListener("mouseup", handleMouseUp);
+        });
+        
+        function handleMouseMove(event) {
+            if (isDragging) {
+                const newWidth = event.clientX / window.innerWidth * 100; // new width as percentage
+                if (newWidth > 25 && newWidth < 75) { // check if it is less than 25% of screen; 50% of original
+                    videoContainer.style.width = `${newWidth}%`;
+                    chatContainer.style.width = `${100 - newWidth}%`;
+                }
             }
         }
-    }
-
-    function handleMouseUp() {
-        isDragging = false;
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
+        
+        function handleMouseUp() {
+            isDragging = false;
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
+        }
     }
 });
