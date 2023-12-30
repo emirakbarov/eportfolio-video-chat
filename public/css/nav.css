@@ -31,3 +31,17 @@
 .nav-item:hover {
     border-top: solid 4px var(--darkest-green);
 }
+
+#logo {
+    display: flex;
+    align-items:last baseline;
+    justify-content: center;
+}
+
+#logo img {
+    width: 12rem;
+}
+
+#logo:hover {
+    border-top: none;
+}

@@ -18,12 +18,15 @@ do {
 
 //check if room full
 
+console.log('here');
+
 socket.on('room-full', () => {
     alert('Room is full, try another room');
     window.location.href = window.location.origin + '/room';
 });
 
 //create user video
+
 const userVideo = document.createElement('video');
 userVideo.classList.add('videos');
 userVideoContainer.append(userVideo);
@@ -37,6 +40,7 @@ navigator.mediaDevices.getUserMedia({
     addVideoStream(userVideo, stream); // add the video stream to the video component
 
     socket.on('create-connection', userId => {
+        console.log('con created');
         connectToNewUser(userId, stream);
     }); 
     // handle calling response
@@ -83,19 +87,25 @@ navigator.mediaDevices.getUserMedia({
     });
 });
 
+
 function connectToNewUser(userId, stream) {
+    console.log('f');
     const call = peer.call(userId, stream); // call the user with the given Id
     const video = document.createElement("video");
     video.classList.add('videos');
     partnerVideoContainer.append(video);
+    console.log('f');
     call.on('stream', (userVideoStream) => {
-      addVideoStream(video, userVideoStream);
+        console.log('f');
+        addVideoStream(video, userVideoStream);
     });
     call.on('close', () => {
         video.remove();
     });
+    console.log('f');
     peers[userId] = call;
     console.log(call);
+    console.log('f');
 };
 
 function checkForUsers(users) {
