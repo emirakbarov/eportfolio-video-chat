@@ -8,11 +8,10 @@ const io = new Server(server, {
 });
 const { v4: uuidV4 } = require('uuid');
 const bp = require('body-parser');
-const port = 3000;
+const mongoose = require('mongoose');
+const PORT = 3000;
 const roomSockets = {};
 const users = {};
-const rooms = {};
-const codes = [];
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
@@ -22,48 +21,50 @@ app.use(bp.json());
 connectDB();
 
 const roomSchema = new mongoose.Schema({
-    code: String,
+    code: Number,
     roomId: String,
 });
-const joinableRoom = mongoose.model('joinableRoom', roomSchema);
+const JoinableRoom = mongoose.model('JoinableRoom', roomSchema);
 
 app.get('/', (req, res) => {
     res.render('index.ejs');
 });
+app.get('/room', (req, res) => {
+    res.render('room.ejs', {roomId: "/"});
+});
 app.get('/new-room', (req, res) => {
-    const joinCode = "null";
-    res.redirect(`/${uuidV4()}?joinCode=${joinCode}`);
+    res.redirect(`/${uuidV4()}`);
 });
 
-app.get('/manual-create', (req, res) => {
-    const joinCode = code();
+app.get('/manual-create', async (req, res) => {
+    const joinCode = await code();
     res.redirect(`/${uuidV4()}?joinCode=${joinCode}`);
 });
 
 app.post('/manual-join', (req, res) => {
     const enteredCode = req.body.code;
-    console.log(enteredCode, rooms[enteredCode]);
-    if (rooms[enteredCode]) {
-        res.redirect(`/${uuidV4()}?enteredCode=${enteredCode}`);
-    } else {
-        // Handle the case where the entered code is not valid
-        res.render('index.ejs', { errorMessage: 'Invalid code' });
-    }
+    res.redirect(`/${uuidV4()}?enteredCode=${enteredCode}`);
 });
 
-app.get('/:room', (req, res) => {
-    const joinCode = req.query.joinCode;
-    const enteredCode = req.query.enteredCode;
+app.get('/:room', async (req, res) => {
+    const joinCode = parseInt(req.query.joinCode);
+    const enteredCode = parseInt(req.query.enteredCode);
 
     if (joinCode) {
-        rooms[joinCode] = req.params.room;
-        res.render('room.ejs', { roomId: req.params.room });
+        const roomUrl = req.params.room;
+        const room = new JoinableRoom({joinCode, roomUrl});
+        await room.save();
+        console.log(room);
+        res.render('room.ejs', { roomId: roomUrl });
     } else if (enteredCode) {
-        if (rooms[enteredCode]) {
-            res.render(`/${rooms[enteredCode]}`);
+        const lookForRoom = await JoinableRoom.findOne({'code': enteredCode});
+        console.log(lookForRoom);
+        if (lookForRoom) {
+            const roomId = lookForRoom.roomId;
+            res.render(`/${roomId}`);
         } else {
             const referer = req.headers.referer || '/';
-            res.redirect(`${referer}`, { err: '404' });
+            res.redirect(`${referer}`);
         }
     } else {
         res.render('room.ejs', { roomId: req.params.room });
@@ -103,15 +104,32 @@ io.on('connection', socket => {
     });
 });
 
-server.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+
+mongoose.connection.once('open', () => {
+    console.log("database connected");
+    app.listen(PORT, () => {
+        console.log('server running on port', PORT);
+    });
 });
 
-function code() {
+async function connectDB() {
+    try {
+        await mongoose.connect('mongodb+srv://akbarovemir3:uh7MS2hNk2ozb1BM@chatapp-data.elw2r2p.mongodb.net/?retryWrites=true&w=majority', {
+            useUnifiedTopology:true,
+            useNewUrlParser:true
+        });
+    } catch(err) {
+        console.log(err);
+    }
+}
+
+async function code() {
     let code;
+    const allCodes = await JoinableRoom.find({}, 'code');
+    
     do {
         code = Math.floor(100000 + Math.random() * 900000);
-    } while (codes[code])
-    codes.push(code);
+    } while (allCodes.includes(code));
+
     return code;
 }
