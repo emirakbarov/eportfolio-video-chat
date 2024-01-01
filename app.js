@@ -10,7 +10,6 @@ const JoinableRoom = require('./Room.js');
 const ActiveRoom = require('./ActiveRoom.js');
 const PORT = 3000;
 const roomSockets = {};
-const users = {};
 let activeRooms = [];
 let roomSocketsCount = 0;
 
@@ -92,34 +91,34 @@ app.get('/:room', async (req, res) => {
 });
 
 io.on('connection', socket => {
-    socket.on('request-connection', (roomId, userId) => {
-        console.log('this one', roomSocketsCount);
-        if (roomSocketsCount >= 2) {
-            console.log('that one', roomSocketsCount);
-            socket.emit('room-full'); // Inform the client that the room is full
-            updateFullProperty(roomId);
-            return;
+
+    var numClients = {};
+
+    socket.on('request-connection', (roomId, userId, name) => {
+        if (numClients[roomId] == undefined) {
+            numClients[roomId] = 1;
+        } else {
+            numClients[roomId]++;
         }
+        console.log('this one', numClients[roomId]);
         socket.join(roomId);
-        socket.broadcast.to(roomId).emit('create-connection', userId);
-        socket.on('new-user', name => {
-            roomSocketsCount++;
-            users[socket.id] = name;
-            socket.broadcast.to(roomId).emit('broadcast-user-join', name);
-            socket.to(roomId).emit('get-users', users);
+        console.log(numClients[roomId]);
+        if (numClients[roomId] > 2) {
+            socket.emit('room-full'); // Inform the client that the room is full
+        }
+        socket.broadcast.to(roomId).emit('create-connection', userId, name); // to other user
+        socket.on('new-user', () => {
+            numClients[roomId]++;
+            updateFullProperty(roomId);
         });
         
+        console.log(numClients[roomId]);
         socket.on('send-message', message => {
-            socket.broadcast.to(roomId).emit('broadcast-message', message, users[socket.id]);
+            socket.broadcast.to(roomId).emit('broadcast-message', message, name);
         });
         socket.on('disconnect', () => {
-            console.log(`${users[socket.id]} disconnected`);
-            const temp = users[socket.id];
-            delete users[socket.id];
-            socket.broadcast.to(roomId).emit('user-disconnected', temp, users, userId);
-
-            roomSocketsCount--;
-            console.log('after disonnection', roomSocketsCount)
+            numClients[roomId]--;
+            console.log('after disonnection', numClients[roomId]);
         });
     });
 });
