@@ -23,24 +23,26 @@ app.get('/', (req, res) => {
     res.render('index.ejs');
 });
 app.get('/new-room', async (req, res) => {
-    getActiveRooms().then(activeRooms => {
-        if (activeRooms) {
-            let selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
-            if (selectedRoom.roomId == roomUrl) {
-                if (activeRooms.length == 1) {
-                    res.redirect(`/${uuidV4()}`);
-                } else {
-                    selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
-                    res.redirect(`/${selectedRoom.roomId}?final=true`);
-                }
-            } else {
-                res.redirect(`/${selectedRoom.roomId}?final=true`); // go to available room
-            }
-        } else {
-            console.log('no active rooms')
-            res.redirect(`/${uuidV4()}`); // redirect to a new room
-        }
-    });
+    console.log(roomUrl);
+    res.redirect(`/${uuidV4()}`);
+    //getActiveRooms().then(activeRooms => {
+    //    if (activeRooms) {
+    //        let selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
+    //        if (selectedRoom.roomId == roomUrl) {
+    ///            if (activeRooms.length == 1) {
+    //                res.redirect(`/${uuidV4()}`);
+    //            } else {
+    //                selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
+    //                res.redirect(`/${selectedRoom.roomId}?final=true`);
+    //            }
+    //        } else {
+    //            res.redirect(`/${selectedRoom.roomId}?final=true`); // go to available room
+   //         }
+    //    } else {
+    //        console.log('no active rooms')
+    //        res.redirect(`/${uuidV4()}`); // redirect to a new room
+    //    }
+    //});
 
 });
 app.get('/room', (req, res) => {
@@ -106,7 +108,9 @@ app.get('/:room', async (req, res) => {
 
 io.on('connection', socket => {
     socket.on('request-connection', async (roomId, userId, name) => {
-        let room = await io.engine.clientsCount;
+        let room = await io.of('/').allSockets();
+        let other = await io.of('/').in(roomId).allSockets();
+        console.log(room, other);
         
         socket.join(roomId);
         
