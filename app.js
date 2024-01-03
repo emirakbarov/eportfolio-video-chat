@@ -59,7 +59,7 @@ app.get('/:room', async (req, res) => {
         console.log(room);
         res.redirect(`/${roomUrl}`);
     } else if (enteredCode) {
-        const lookForRoom = await JoinableRoom.findOne({'code': enteredCode});
+        const lookForRoom = await JoinableRoom.findOne({code: enteredCode});
         console.log(lookForRoom);
         if (lookForRoom) {
             const roomId = lookForRoom.roomId;
@@ -69,24 +69,30 @@ app.get('/:room', async (req, res) => {
             res.redirect(`${referer}`);
         }
     } else {
-        if (req.query.final != 'true') {
-            if (roomUrl !== 'favicon.ico' &&
-                roomUrl !== 'robots.txt' &&
-                roomUrl !== 'sitemap.xml' &&
-                roomUrl !== 'crossdomain.xml' &&
-                roomUrl !== 'humans.txt' &&
-                roomUrl !== 'ads.txt' &&
-                !roomUrl.startsWith('.well-known/') &&
-                roomUrl !== 'manifest.json' &&
-                roomUrl !== 'favicon.png' &&
-                roomUrl !== 'apple-touch-icon.png' &&
-                roomUrl !== 'browserconfig.xml') {
-
-                const newRoom = new ActiveRoom({ roomId: roomUrl, full: false });
-                await newRoom.save(); // save to db
-            } 
+        const existingRoom = await ActiveRoom.findOne({ roomId: roomUrl, full: true });
+        if (existingRoom != undefined) {
+            res.render('room.ejs', { roomId: '/' });
+        } else {
+            if (req.query.final != 'true') {
+                if (roomUrl !== 'favicon.ico' &&
+                    roomUrl !== 'robots.txt' &&
+                    roomUrl !== 'sitemap.xml' &&
+                    roomUrl !== 'crossdomain.xml' &&
+                    roomUrl !== 'humans.txt' &&
+                    roomUrl !== 'ads.txt' &&
+                    !roomUrl.startsWith('.well-known/') &&
+                    roomUrl !== 'manifest.json' &&
+                    roomUrl !== 'favicon.png' &&
+                    roomUrl !== 'apple-touch-icon.png' &&
+                    roomUrl !== 'browserconfig.xml') {
+    
+                    const newRoom = new ActiveRoom({ roomId: roomUrl, full: false });
+                    await newRoom.save(); // save to db
+                } 
+            } else {
+                res.render('room.ejs', { roomId: roomUrl });
+            }
         }
-        res.render('room.ejs', { roomId: req.params.room });
     }
 });
 
