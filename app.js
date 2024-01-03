@@ -9,9 +9,7 @@ const mongoose = require('mongoose');
 const JoinableRoom = require('./Room.js');
 const ActiveRoom = require('./ActiveRoom.js');
 const PORT = 3000;
-const roomSockets = {};
 let activeRooms = [];
-let roomSocketsCount = 0;
 let roomUrl;
 
 app.set('view engine', 'ejs');
@@ -24,16 +22,26 @@ connectDB(); // connect the database'
 app.get('/', (req, res) => {
     res.render('index.ejs');
 });
-app.get('/new-room', (req, res) => {
+app.get('/new-room', async (req, res) => {
     getActiveRooms().then(activeRooms => {
         if (activeRooms) {
-            const selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
-            res.redirect(`/${selectedRoom.roomId}?final=true`); // go to available room
+            let selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
+            if (selectedRoom.roomId == roomUrl) {
+                if (activeRooms.length == 1) {
+                    res.redirect(`/${uuidV4()}`);
+                } else {
+                    selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
+                    res.redirect(`/${selectedRoom.roomId}?final=true`);
+                }
+            } else {
+                res.redirect(`/${selectedRoom.roomId}?final=true`); // go to available room
+            }
         } else {
             console.log('no active rooms')
             res.redirect(`/${uuidV4()}`); // redirect to a new room
         }
     });
+
 });
 app.get('/room', (req, res) => {
     res.render('room.ejs', {roomId: "/"});
@@ -107,6 +115,7 @@ io.on('connection', socket => {
         socket.on('new-user', () => {
             console.log('join: ' + room);
             updateFullProperty(roomId, true);
+            console.log('full property updated to true');
         });
         
         socket.on('send-message', message => {
@@ -116,11 +125,14 @@ io.on('connection', socket => {
         socket.on('disconnect', async () => {
             console.log('after disconnection: 1 ' + room);
             room--;
-            if (room == 1) {
-                socket.broadcast.to(roomId).emit('user-disconnected', name, userId);
-               updateFullProperty(roomId, false);
-            } else {
+            if (room == 0) {
                 await ActiveRoom.deleteOne({roomId: roomUrl});
+                console.log('room deleted');
+            }
+            else if (room == 1) {
+                socket.broadcast.to(roomId).emit('user-disconnected', name, userId);
+                updateFullProperty(roomId, false);
+                console.log('full property updated to false');
             }
             console.log('after disconnection: 2 ' + room);
         });

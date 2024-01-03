@@ -10,6 +10,7 @@ const userVideoContainer = document.getElementById('video1');
 const partnerVideoContainer = document.getElementById('video2');
 let isMuted = false;
 let videoStoped = false;
+let socketDisconnected;
 
 //get name
 do {
@@ -77,6 +78,7 @@ navigator.mediaDevices.getUserMedia({
     socket.on('user-disconnected', (user, userId) => {
         peers[userId].close();
         appendMessage(`${user} disconnected!`, center);
+        socketDisconnected = true;
     });
 });
 
@@ -104,6 +106,13 @@ peer.on('open', id => {
         console.log(id);
     } else {
         console.log('roomid slash');
+    }
+});
+
+window.addEventListener('unload', () => {
+    console.log(socketDisconnected);
+    if (socketDisconnected == false) {
+        socket.disconnect();
     }
 });
 
@@ -144,6 +153,9 @@ function connectToNewUser(userId, stream) {
     });
     call.on('close', () => {
         video.remove();
+        if (socketDisconnected == false) {
+            socket.disconnect();
+        }
     });
     peers[userId] = call;
 };
