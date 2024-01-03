@@ -12,6 +12,7 @@ const PORT = 3000;
 const roomSockets = {};
 let activeRooms = [];
 let roomSocketsCount = 0;
+let roomUrl;
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
@@ -51,16 +52,14 @@ app.post('/manual-join', (req, res) => {
 app.get('/:room', async (req, res) => {
     const joinCode = req.query.joinCode;
     const enteredCode = req.query.enteredCode;
-    const roomUrl = req.params.room;
+    roomUrl = req.params.room;
 
     if (joinCode) {
         const room = new JoinableRoom({code: joinCode, roomId: roomUrl});
         await room.save();
-        console.log(room);
         res.redirect(`/${roomUrl}`);
     } else if (enteredCode) {
         const lookForRoom = await JoinableRoom.findOne({code: enteredCode});
-        console.log(lookForRoom);
         if (lookForRoom) {
             const roomId = lookForRoom.roomId;
             res.redirect(`/${roomId}`);
@@ -70,8 +69,8 @@ app.get('/:room', async (req, res) => {
         }
     } else {
         const existingRoom = await ActiveRoom.findOne({ roomId: roomUrl, full: true });
-        if (existingRoom != undefined) {
-            res.render('room.ejs', { roomId: '/' });
+        if (existingRoom) {
+            res.redirect('/room');
         } else {
             if (req.query.final != 'true') {
                 if (roomUrl !== 'favicon.ico' &&
@@ -88,6 +87,7 @@ app.get('/:room', async (req, res) => {
     
                     const newRoom = new ActiveRoom({ roomId: roomUrl, full: false });
                     await newRoom.save(); // save to db
+                    res.render('room.ejs', { roomId: roomUrl });
                 } 
             } else {
                 res.render('room.ejs', { roomId: roomUrl });
@@ -97,42 +97,40 @@ app.get('/:room', async (req, res) => {
 });
 
 io.on('connection', socket => {
-
-    var numClients = {};
-
-    socket.on('request-connection', (roomId, userId, name) => {
-        if (numClients[roomId] == undefined) {
-            numClients[roomId] = 1;
-        } else {
-            numClients[roomId]++;
-        }
-        console.log('this one', numClients[roomId]);
+    socket.on('request-connection', async (roomId, userId, name) => {
+        let room = await io.engine.clientsCount;
+        
         socket.join(roomId);
-        console.log(numClients[roomId]);
-        if (numClients[roomId] > 2) {
-            socket.emit('room-full'); // Inform the client that the room is full
-        }
+        
         socket.broadcast.to(roomId).emit('create-connection', userId, name); // to other user
+
         socket.on('new-user', () => {
-            numClients[roomId]++;
-            updateFullProperty(roomId);
+            console.log('join: ' + room);
+            updateFullProperty(roomId, true);
         });
         
-        console.log(numClients[roomId]);
         socket.on('send-message', message => {
             socket.broadcast.to(roomId).emit('broadcast-message', message, name);
         });
-        socket.on('disconnect', () => {
-            numClients[roomId]--;
-            console.log('after disonnection', numClients[roomId]);
+
+        socket.on('disconnect', async () => {
+            console.log('after disconnection: 1 ' + room);
+            room--;
+            if (room == 1) {
+                socket.broadcast.to(roomId).emit('user-disconnected', name, userId);
+               updateFullProperty(roomId, false);
+            } else {
+                await ActiveRoom.deleteOne({roomId: roomUrl});
+            }
+            console.log('after disconnection: 2 ' + room);
         });
     });
 });
 
-async function updateFullProperty(roomId) {
+async function updateFullProperty(roomId, boolean) {
     try {
         const filter = {roomId: roomId};
-        const update = { full: true };
+        const update = { full: boolean };
         const updatedRoom = await ActiveRoom.findOneAndUpdate(filter, update);
     } catch(err) {
         console.log(err);

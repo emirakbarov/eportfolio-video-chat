@@ -77,7 +77,6 @@ navigator.mediaDevices.getUserMedia({
     socket.on('user-disconnected', (user, userId) => {
         peers[userId].close();
         appendMessage(`${user} disconnected!`, center);
-        window.location.href = window.location.origin + '/room';
     });
 });
 
