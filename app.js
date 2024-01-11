@@ -24,25 +24,15 @@ app.get('/', (req, res) => {
 });
 app.get('/new-room', async (req, res) => {
     console.log(roomUrl);
-    res.redirect(`/${uuidV4()}`);
-    //getActiveRooms().then(activeRooms => {
-    //    if (activeRooms) {
-    //        let selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
-    //        if (selectedRoom.roomId == roomUrl) {
-    ///            if (activeRooms.length == 1) {
-    //                res.redirect(`/${uuidV4()}`);
-    //            } else {
-    //                selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
-    //                res.redirect(`/${selectedRoom.roomId}?final=true`);
-    //            }
-    //        } else {
-    //            res.redirect(`/${selectedRoom.roomId}?final=true`); // go to available room
-   //         }
-    //    } else {
-    //        console.log('no active rooms')
-    //        res.redirect(`/${uuidV4()}`); // redirect to a new room
-    //    }
-    //});
+    getActiveRooms().then(activeRooms => {
+        if (activeRooms) {
+            let selectedRoom = activeRooms[Math.floor(Math.random() * activeRooms.length)];
+            res.redirect(`/${selectedRoom.roomId}?final=true`);
+        } else {
+            console.log('no active rooms');
+            res.redirect(`/${uuidV4()}`);  // redirect to a new room
+        }
+    });
 
 });
 app.get('/room', (req, res) => {
@@ -82,7 +72,8 @@ app.get('/:room', async (req, res) => {
         if (existingRoom) {
             res.redirect('/room');
         } else {
-            if (req.query.final != 'true') {
+            const isFinal = req.query.final;
+            if (isFinal != 'true') {
                 if (roomUrl !== 'favicon.ico' &&
                     roomUrl !== 'robots.txt' &&
                     roomUrl !== 'sitemap.xml' &&
@@ -106,39 +97,41 @@ app.get('/:room', async (req, res) => {
     }
 });
 
-io.on('connection', socket => {
-    socket.on('request-connection', async (roomId, userId, name) => {
-        let room = await io.of('/').allSockets();
-        let other = await io.of('/').in(roomId).allSockets();
-        console.log(room, other);
-        
+io.on('connect', socket => {
+    socket.on('request-connection', (roomId, userId, name) => {
         socket.join(roomId);
+
+        let room = io.sockets.adapter.rooms.get(roomId);
+        let roomSize = room.size;
+        console.log('room size: ' + roomSize);
         
         socket.broadcast.to(roomId).emit('create-connection', userId, name); // to other user
 
         socket.on('new-user', () => {
-            console.log('join: ' + room);
             updateFullProperty(roomId, true);
             console.log('full property updated to true');
+            console.log('join: ' + roomSize);
         });
         
         socket.on('send-message', message => {
             socket.broadcast.to(roomId).emit('broadcast-message', message, name);
         });
+        socket.on('update-room-size', () => {
+            roomSize--;
+            console.log('room size lowered to', roomSize)
+        });
 
         socket.on('disconnect', async () => {
-            console.log('after disconnection: 1 ' + room);
-            room--;
-            if (room == 0) {
+            if (roomSize == 0) {
                 await ActiveRoom.deleteOne({roomId: roomUrl});
                 console.log('room deleted');
             }
-            else if (room == 1) {
+            else if (roomSize == 1) {
                 socket.broadcast.to(roomId).emit('user-disconnected', name, userId);
                 updateFullProperty(roomId, false);
                 console.log('full property updated to false');
             }
-            console.log('after disconnection: 2 ' + room);
+            console.log('after disconnection 2: ' + roomSize);
         });
     });
 });

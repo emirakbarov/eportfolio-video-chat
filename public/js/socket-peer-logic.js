@@ -79,6 +79,7 @@ navigator.mediaDevices.getUserMedia({
         peers[userId].close();
         appendMessage(`${user} disconnected!`, center);
         socketDisconnected = true;
+        socket.emit('update-room-size');
     });
 });
 
