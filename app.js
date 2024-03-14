@@ -17,7 +17,7 @@ app.use(express.static('public'));
 app.use(bp.urlencoded({ extended: false }));
 app.use(bp.json());
 
-connectDB(); // connect the database'
+connectDB(); // connect the database
 
 app.get('/', (req, res) => {
     res.render('index.ejs');
@@ -33,7 +33,6 @@ app.get('/new-room', async (req, res) => {
             res.redirect(`/${uuidV4()}`);  // redirect to a new room
         }
     });
-
 });
 app.get('/room', (req, res) => {
     res.render('room.ejs', {roomId: "/"});
