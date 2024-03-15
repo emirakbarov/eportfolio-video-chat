@@ -8,6 +8,13 @@ const center = 'center-message';
 
 // resize draggable
 document.addEventListener("DOMContentLoaded",  () => {
+
+    
+
+    if (!localStorage.getItem('v') || localStorage.getItem('v') == false) {
+        const v = document.getElementById('verification');
+        v.style.animation = 'squeezeIn ease 0.2s forwards 1';
+    }
     // load initial anims
     const title = document.getElementById('title');
     const desc = document.getElementById('desc');
@@ -67,5 +74,32 @@ document.addEventListener("DOMContentLoaded",  () => {
             document.removeEventListener("mousemove", handleMouseMove);
             document.removeEventListener("mouseup", handleMouseUp);
         }
+    }
+    if (JOIN_CODE != 0) {
+        document.getElementById('message').placeholder = "Code: " + JOIN_CODE;
+    }
+});
+
+const infoBtn = document.getElementById('info-btn');
+const abtSafety = document.getElementById('abt-safety');
+
+infoBtn.addEventListener('click',() => {
+    abtSafety.style.animation = "squeezeIn ease 0.2s forwards 1";
+});
+
+const x = document.getElementById('close');
+x.addEventListener('click', () => {
+    abtSafety.style.animation = "squeezeOut ease 0.2s forwards 1";
+});
+
+const v = document.getElementById('verification');
+const ver = document.getElementById('verify');
+
+ver.addEventListener('submit', e => {
+    e.preventDefault(); 
+    const emailInput = ver.querySelector('[name=email]').value;
+    if (emailInput.includes('@stu.acs-schools.com')) {
+        v.style.animation = "squeezeOut ease 0.2s forwards 1";
+        localStorage.setItem('v', true);
     }
 });

@@ -76,10 +76,13 @@ navigator.mediaDevices.getUserMedia({
         }
     });
     socket.on('user-disconnected', (user, userId) => {
-        peers[userId].close();
-        appendMessage(`${user} disconnected!`, center);
+        if (peers[userId]){
+            peers[userId].close(); //close cam
+        }
+        appendMessage(`${user} disconnected!`, center); //say user gone
         socketDisconnected = true;
-        socket.emit('update-room-size');
+        window.location.href = window.location.origin + '/room'; //redirect to home 
+        console.log('redirected');
     });
 });
 
@@ -154,9 +157,7 @@ function connectToNewUser(userId, stream) {
     });
     call.on('close', () => {
         video.remove();
-        if (socketDisconnected == false) {
-            socket.disconnect();
-        }
     });
+    console.log(call);
     peers[userId] = call;
 };

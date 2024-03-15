@@ -11,7 +11,7 @@
     background-color: var(--app-green);
     border-radius: 10px;
     border: solid 5px var(--darkest-green);
-    overflow: hidden; /* Ensure content doesn't overflow */
+    overflow: hidden; 
 }
 #video-container {
     width: 26%;

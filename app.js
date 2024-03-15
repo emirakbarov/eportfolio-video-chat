@@ -35,7 +35,7 @@ app.get('/new-room', async (req, res) => {
     });
 });
 app.get('/room', (req, res) => {
-    res.render('room.ejs', {roomId: "/"});
+    res.render('room.ejs', {roomId: "/", code: 0});
 });
 app.get('/manual-create', async (req, res) => {
     const joinCode = await code();
@@ -56,7 +56,7 @@ app.get('/:room', async (req, res) => {
     if (joinCode) {
         const room = new JoinableRoom({code: joinCode, roomId: roomUrl});
         await room.save();
-        res.redirect(`/${roomUrl}`);
+        res.render('room.ejs', {roomId: roomUrl, code: joinCode});
     } else if (enteredCode) {
         const lookForRoom = await JoinableRoom.findOne({code: enteredCode});
         if (lookForRoom) {
@@ -87,10 +87,10 @@ app.get('/:room', async (req, res) => {
     
                     const newRoom = new ActiveRoom({ roomId: roomUrl, full: false });
                     await newRoom.save(); // save to db
-                    res.render('room.ejs', { roomId: roomUrl });
+                    res.render('room.ejs', { roomId: roomUrl, code: 0 });
                 } 
             } else {
-                res.render('room.ejs', { roomId: roomUrl });
+                res.render('room.ejs', { roomId: roomUrl, code: 0 });
             }
         }
     }
@@ -115,22 +115,11 @@ io.on('connect', socket => {
         socket.on('send-message', message => {
             socket.broadcast.to(roomId).emit('broadcast-message', message, name);
         });
-        socket.on('update-room-size', () => {
-            roomSize--;
-            console.log('room size lowered to', roomSize)
-        });
-
         socket.on('disconnect', async () => {
-            if (roomSize == 0) {
-                await ActiveRoom.deleteOne({roomId: roomUrl});
-                console.log('room deleted');
-            }
-            else if (roomSize == 1) {
-                socket.broadcast.to(roomId).emit('user-disconnected', name, userId);
-                updateFullProperty(roomId, false);
-                console.log('full property updated to false');
-            }
-            console.log('after disconnection 2: ' + roomSize);
+            socket.broadcast.to(roomId).emit('user-disconnected', name, userId);
+            await ActiveRoom.deleteOne({roomId: roomUrl});
+            await JoinableRoom.deleteOne({roomId: roomUrl});
+            console.log('room deleted');
         });
     });
 });
@@ -175,7 +164,7 @@ async function connectDB() {
         console.log('db connected');
         server.listen(PORT, () => {
             console.log('Server running on port', PORT);
-        })
+        }); //port is 3000
     })
     .catch(err => console.log(err));
 }

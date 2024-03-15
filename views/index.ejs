@@ -13,13 +13,15 @@
 <body>
   <%- include('./partials/nav.ejs') %>
   <main>
+    <%- include('./partials/abt-safety.ejs') %>
+    <%- include('./partials/verify.ejs') %>
     <div class="hidden" id="title-container">
-      <h1 id="title">Welcome to Chatapp!</h1>
-      <h3 id="desc" class="normal-text">Chatapp offers a private one-to-one video conferencing app, but also allows users to chat with random strangers. If you have someone to meet, use the "Private" tab on the navbar and make your date. If not, use the "New" tab to start chatting!</h3>
+      <h1 id="title">Welcome to Chattr!</h1>
+      <h3 id="desc" class="normal-text">Chattr offers a private one-to-one video conferencing app, but also allows users to chat with random strangers. If you have someone to meet, use the "Private" tab on the navbar and make your date. If not, use the "New" tab to start chatting!</h3>
     </div>
     <div class="hidden" id="strangers-container">
       <h2 id="strangers-chat-header" class="headers">Chat to strangers!</h2> 
-      <h3 class="normal-text">Chat to a stranger! <a href="/room" style="color: var(--darkest-green);">Join a random room now!</a> <br> There are <span id="users-online">100</span> users online!</h3>
+      <h3 class="normal-text">If you want to meet random students from ACS Egham, click the 'New' button and get going!</h3>
     </div>
     <div class="hidden" id="manual-container">
       <h2 id="manual-join-hedear" style="padding-top: 4rem;  box-sizing: border-box;" class="headers">Join a meeting! </h2>
@@ -34,8 +36,5 @@
       </form>
     </div>
   </main>
-  <footer id="footer">
-    <p>hello</p>
-  </footer>
 </body>
 </html>
