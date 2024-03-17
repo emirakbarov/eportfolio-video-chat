@@ -158,6 +158,6 @@ function connectToNewUser(userId, stream) {
     call.on('close', () => {
         video.remove();
     });
-    console.log(call);
+    console.log('this is the call', call);
     peers[userId] = call;
 };
