@@ -38,7 +38,7 @@ navigator.mediaDevices.getUserMedia({
     audio: true
 }).then(stream => {
     var peer = new Peer({
-        host: 'localhost',
+        host: 'chatapp-zvr0.onrender.com',
         port: 3000,
         path: '/peerjs',
         config: { 'iceServers': [
