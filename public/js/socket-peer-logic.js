@@ -32,13 +32,15 @@ userVideo.classList.add('videos');
 userVideoContainer.append(userVideo);
 userVideo.muted = true;
 
+console.log(window.location.host)
+
 //add audio to video
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
 }).then(stream => {
     var peer = new Peer({
-        host: 'chatapp-zvr0.onrender.com',
+        host: window.location.hostname,
         port: 3000,
         path: '/peerjs',
         config: { 'iceServers': [
