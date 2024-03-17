@@ -1,6 +1,5 @@
 // define vars
 const socket = io();
-var peer = new Peer();
 const peers = {};
 
 // define static vars 
@@ -38,8 +37,44 @@ navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true
 }).then(stream => {
+    var peer = new Peer({
+        host: 'localhost',
+        port: 3000,
+        path: '/peerjs',
+        config: { 'iceServers': [
+        { url: 'stun:stun01.sipphone.com' },
+        { url: 'stun:stun.ekiga.net' },
+    { url: 'stun:stunserver.org' },
+    { url: 'stun:stun.softjoys.com' },
+    { url: 'stun:stun.voiparound.com' },
+    { url: 'stun:stun.voipbuster.com' },
+    { url: 'stun:stun.voipstunt.com' },
+    { url: 'stun:stun.voxgratia.org' },
+    { url: 'stun:stun.xten.com' },
+    {
+        url: 'turn:192.158.29.39:3478?transport=udp',
+        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+        username: '28224511:1379330808'
+    },
+    {
+        url: 'turn:192.158.29.39:3478?transport=tcp',
+        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+        username: '28224511:1379330808'
+        }
+      ]
+       },
+    
+    debug: 3
+    });
     addVideoStream(userVideo, stream); // add the video stream to the video component
-
+    peer.on('open', otherId => {
+        if(ROOM_ID != '/') {
+            socket.emit('request-connection', ROOM_ID, otherId, name);
+            console.log(otherId);
+        } else {
+            console.log('roomid slash');
+        }
+    });
     appendMessage(`You (${name}) joined`, center); // tell who joined
 
     socket.on('create-connection', (otherId, name) => { // as other user
@@ -59,15 +94,22 @@ navigator.mediaDevices.getUserMedia({
             console.log(partnerVideoStream);
         });
     });
-});
+    peer.on('error', error => console.error(error))
 
-peer.on('open', otherId => {
-    if(ROOM_ID != '/') {
-        socket.emit('request-connection', ROOM_ID, otherId, name);
-        console.log(otherId);
-    } else {
-        console.log('roomid slash');
-    }
+    function connectToNewUser(otherId, stream) {
+        const call = peer.call(otherId, stream); // call the user with the given Id
+        const video = document.createElement("video");
+        video.classList.add('videos');
+        partnerVideoContainer.append(video);
+        call.on('stream', (userVideoStream) => {
+            addVideoStream(video, userVideoStream);
+        });
+        call.on('close', () => {
+            video.remove();
+        });
+        console.log('this is the call', call);
+        peers[otherId] = call;
+    };
 });
 
 //------------------------------------------messaging-----------------------------------------------
@@ -131,6 +173,13 @@ stopVideo.addEventListener('click', () => {
 
 //-------------------------------------------Housekeeping-----------------------------------------------
 
+window.addEventListener('unload', () => {
+    console.log(socketDisconnected);
+    if (socketDisconnected == false) {
+        socket.disconnect();
+    }
+});
+
 socket.on('user-disconnected', (name, otherId) => {
     if (peers[otherId]){
         peers[otherId].close(); //close cam
@@ -141,31 +190,9 @@ socket.on('user-disconnected', (name, otherId) => {
     console.log('redirected');
 });
 
-window.addEventListener('unload', () => {
-    console.log(socketDisconnected);
-    if (socketDisconnected == false) {
-        socket.disconnect();
-    }
-});
-
 function addVideoStream(video, stream) {
     video.srcObject = stream;
     video.addEventListener('loadedmetadata', () => {
       video.play();
     })
 }
-
-function connectToNewUser(otherId, stream) {
-    const call = peer.call(otherId, stream); // call the user with the given Id
-    const video = document.createElement("video");
-    video.classList.add('videos');
-    partnerVideoContainer.append(video);
-    call.on('stream', (userVideoStream) => {
-        addVideoStream(video, userVideoStream);
-    });
-    call.on('close', () => {
-        video.remove();
-    });
-    console.log('this is the call', call);
-    peers[otherId] = call;
-};

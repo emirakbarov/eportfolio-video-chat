@@ -3,6 +3,8 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io')(server);
+var ExpressPeerServer = require('peer').ExpressPeerServer;
+app.use('/peerjs', ExpressPeerServer(server, {debug: true}));
 const { v4: uuidV4 } = require('uuid');
 const bp = require('body-parser');
 const mongoose = require('mongoose');
