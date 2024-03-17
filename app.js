@@ -102,7 +102,6 @@ io.on('connect', socket => {
 
         let room = io.sockets.adapter.rooms.get(roomId);
         let roomSize = room.size;
-        console.log('room size: ' + roomSize);
         
         socket.broadcast.to(roomId).emit('create-connection', userId, name); // to other user
 

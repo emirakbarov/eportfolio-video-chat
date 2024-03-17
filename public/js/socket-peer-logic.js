@@ -40,58 +40,54 @@ navigator.mediaDevices.getUserMedia({
 }).then(stream => {
     addVideoStream(userVideo, stream); // add the video stream to the video component
 
-    appendMessage(`You (${name}) joined`, center);
+    appendMessage(`You (${name}) joined`, center); // tell who joined
 
-    socket.on('create-connection', (userId, name) => { // as other user
-        connectToNewUser(userId, stream);
+    socket.on('create-connection', (otherId, name) => { // as other user
+        connectToNewUser(otherId, stream);
         appendMessage(`${name} joined`, center);
         socket.emit('new-user');
     }); 
     // handle calling response
     peer.on('call', call => {
         console.log('called');
-        call.answer(stream);
+        call.answer(stream); //send them the stream
         const partnerVideo = document.createElement('video');
         partnerVideo.classList.add('videos');
         partnerVideoContainer.append(partnerVideo);
         call.on('stream', partnerVideoStream => {
             addVideoStream(partnerVideo, partnerVideoStream);
+            console.log(partnerVideoStream);
         });
-    });
-    console.log('new user broadcasted');
-
-    socket.on('broadcast-message', (message, name) => {
-        appendMessage(`${name}: ${message}`, left);
-    });
-
-    messageForm.addEventListener('submit', e => {
-        e.preventDefault();
-        const message = document.getElementById('message');
-        if (message.value != '') {
-            socket.emit('send-message', message.value);
-            appendMessage(`You: ${message.value}`, right);
-            message.value = '';
-        } else {
-            alert('Please enter a message!');
-        }
-    });
-    socket.on('user-disconnected', (user, userId) => {
-        if (peers[userId]){
-            peers[userId].close(); //close cam
-        }
-        appendMessage(`${user} disconnected!`, center); //say user gone
-        socketDisconnected = true;
-        window.location.href = window.location.origin + '/room'; //redirect to home 
-        console.log('redirected');
     });
 });
 
-function addVideoStream(video, stream) {
-    video.srcObject = stream;
-    video.addEventListener('loadedmetadata', () => {
-      video.play();
-    })
-}
+peer.on('open', otherId => {
+    if(ROOM_ID != '/') {
+        socket.emit('request-connection', ROOM_ID, otherId, name);
+        console.log(otherId);
+    } else {
+        console.log('roomid slash');
+    }
+});
+
+//------------------------------------------messaging-----------------------------------------------
+
+socket.on('broadcast-message', (message, name) => {
+    appendMessage(`${name}: ${message}`, left);
+});
+
+messageForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const message = document.getElementById('message');
+    if (message.value != '') {
+        socket.emit('send-message', message.value);
+        appendMessage(`You: ${message.value}`, right);
+        message.value = '';
+    } else {
+        alert('Please enter a message!');
+    }
+});
+
 function appendMessage(message, pos) {
     const appendedMessage = document.createElement('div');
     appendedMessage.classList.add("div");
@@ -101,24 +97,10 @@ function appendMessage(message, pos) {
     messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 
+//-------------------------------------------mute and stop video-----------------------------------------------
+
 const muteSelf = document.getElementById('mute-self');
 const stopVideo = document.getElementById('stop-video-self');
-
-peer.on('open', id => {
-    if(ROOM_ID != '/') {
-        socket.emit('request-connection', ROOM_ID, id, name);
-        console.log(id);
-    } else {
-        console.log('roomid slash');
-    }
-});
-
-window.addEventListener('unload', () => {
-    console.log(socketDisconnected);
-    if (socketDisconnected == false) {
-        socket.disconnect();
-    }
-});
 
 muteSelf.addEventListener('click', () => {
     if (userVideo) {
@@ -147,8 +129,34 @@ stopVideo.addEventListener('click', () => {
     }
 });
 
-function connectToNewUser(userId, stream) {
-    const call = peer.call(userId, stream); // call the user with the given Id
+//-------------------------------------------Housekeeping-----------------------------------------------
+
+socket.on('user-disconnected', (name, otherId) => {
+    if (peers[otherId]){
+        peers[otherId].close(); //close cam
+    }
+    appendMessage(`${name} disconnected!`, center); //say user gone
+    socketDisconnected = true;
+    window.location.href = window.location.origin + '/room'; //redirect to home 
+    console.log('redirected');
+});
+
+window.addEventListener('unload', () => {
+    console.log(socketDisconnected);
+    if (socketDisconnected == false) {
+        socket.disconnect();
+    }
+});
+
+function addVideoStream(video, stream) {
+    video.srcObject = stream;
+    video.addEventListener('loadedmetadata', () => {
+      video.play();
+    })
+}
+
+function connectToNewUser(otherId, stream) {
+    const call = peer.call(otherId, stream); // call the user with the given Id
     const video = document.createElement("video");
     video.classList.add('videos');
     partnerVideoContainer.append(video);
@@ -159,5 +167,5 @@ function connectToNewUser(userId, stream) {
         video.remove();
     });
     console.log('this is the call', call);
-    peers[userId] = call;
+    peers[otherId] = call;
 };
