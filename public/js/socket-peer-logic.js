@@ -41,7 +41,7 @@ navigator.mediaDevices.getUserMedia({
 }).then(stream => {
     var peer = new Peer({
         host: window.location.hostname,
-        port: 3000,
+        port: 3001,
         path: '/peerjs',
         config: { 'iceServers': [
         { url: 'stun:stun01.sipphone.com' },
