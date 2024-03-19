@@ -10,7 +10,7 @@ const bp = require('body-parser');
 const mongoose = require('mongoose');
 const JoinableRoom = require('./Room.js');
 const ActiveRoom = require('./ActiveRoom.js');
-const PORT = 80;
+const PORT = process.env.PORT || 80;
 let activeRooms = [];
 let roomUrl;
 
