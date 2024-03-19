@@ -11,10 +11,10 @@ let isMuted = false;
 let videoStoped = false;
 let socketDisconnected;
 
-// //get name
-// do {
-//     name = prompt('What is your name?');
-// } while (name == null);
+ //get name
+do {
+     name = prompt('What is your name?');
+} while (name == null);
 
 //check if room full
 
